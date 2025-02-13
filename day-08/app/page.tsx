@@ -23,7 +23,6 @@ export default async function Home() {
     <main className="container mx-auto px-4 py-8">
       <h1 className="text-4xl font-bold mb-8 text-center animate-fade-in">Welcome to Our Blog</h1>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       {posts.map((post: any, index: number) => (
           <Link href={`/post/${post.slug.current}`} key={post._id}>
             <Card
