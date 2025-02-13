@@ -11,26 +11,33 @@ interface Post {
   publishedAt: string
 }
 
+// Define params type
+type Params = {
+  slug: string
+}
+
 // Fetch the post based on slug
-async function getPost(slug: string): Promise<Post | null> {
+async function getPost(params: Params): Promise<Post | null> {
   const query = `*[_type == "post" && slug.current == $slug][0] {
     title,
     mainImage,
     body,
     publishedAt
   }`
-  return client.fetch(query, { slug })
+  return client.fetch(query, { slug: params.slug })
 }
 
-// Update the params type to match Next.js 13+ requirements
-type Props = {
-  params: { slug: string }
-  searchParams: { [key: string]: string | string[] | undefined }
-}
+// Make the component accept Promise<Params>
+export default async function Post({
+  params,
+}: {
+  params: Promise<Params> | Params
+}) {
+  // Resolve the params promise
+  const resolvedParams = await Promise.resolve(params)
 
-export default async function Post({ params }: Props) {
   // Fetching post data based on the slug
-  const post = await getPost(params.slug)
+  const post = await getPost(resolvedParams)
 
   if (!post) {
     return <p className="text-center text-red-500">Post not found</p>
@@ -71,8 +78,8 @@ export default async function Post({ params }: Props) {
   )
 }
 
-// For dynamic routing: Ensure proper static paths generation if needed
-export async function generateStaticParams() {
+// Update generateStaticParams to return Promise
+export async function generateStaticParams(): Promise<Params[]> {
   const query = `*[_type == "post"]{slug}`
   const posts = await client.fetch(query)
 
