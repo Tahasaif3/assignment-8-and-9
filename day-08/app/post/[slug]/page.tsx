@@ -17,27 +17,24 @@ type Params = {
 }
 
 // Fetch the post based on slug
-async function getPost(params: Params): Promise<Post | null> {
+async function getPost(slug: string): Promise<Post | null> {
   const query = `*[_type == "post" && slug.current == $slug][0] {
     title,
     mainImage,
     body,
     publishedAt
   }`
-  return client.fetch(query, { slug: params.slug })
+  return client.fetch(query, { slug })
 }
 
-// Make the component accept Promise<Params>
+// Use the correct type for Next.js 13+ App Router
 export default async function Post({
   params,
 }: {
-  params: Promise<Params> | Params
+  params: { slug: string }
 }) {
-  // Resolve the params promise
-  const resolvedParams = await Promise.resolve(params)
-
   // Fetching post data based on the slug
-  const post = await getPost(resolvedParams)
+  const post = await getPost(params.slug)
 
   if (!post) {
     return <p className="text-center text-red-500">Post not found</p>
@@ -78,8 +75,8 @@ export default async function Post({
   )
 }
 
-// Update generateStaticParams to return Promise
-export async function generateStaticParams(): Promise<Params[]> {
+// Update generateStaticParams to return the correct type
+export async function generateStaticParams(): Promise<{ slug: string }[]> {
   const query = `*[_type == "post"]{slug}`
   const posts = await client.fetch(query)
 
