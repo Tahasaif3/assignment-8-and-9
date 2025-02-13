@@ -28,7 +28,7 @@ type Props = {
   searchParams: { [key: string]: string | string[] | undefined }
 }
 
-export default async function Post({ params, searchParams }: Props) {
+export default async function Post({ params }: Props) {
   // Fetching post data based on the slug
   const post = await getPost(params.slug)
 
