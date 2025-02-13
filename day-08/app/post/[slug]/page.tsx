@@ -3,7 +3,6 @@ import { urlForImage } from "@/sanity/lib/image"
 import { PortableText } from "@portabletext/react"
 import Image from "next/image"
 
-// Define proper types for the post
 interface Post {
   title: string
   mainImage: any
@@ -11,12 +10,10 @@ interface Post {
   publishedAt: string
 }
 
-// Define params type
 type Params = {
   slug: string
 }
 
-// Fetch the post based on slug
 async function getPost(slug: string): Promise<Post | null> {
   const query = `*[_type == "post" && slug.current == $slug][0] {
     title,
@@ -27,14 +24,14 @@ async function getPost(slug: string): Promise<Post | null> {
   return client.fetch(query, { slug })
 }
 
-// Use the correct type for Next.js 13+ App Router
 export default async function Post({
   params,
 }: {
-  params: { slug: string }
+  params: Promise<Params>
 }) {
-  // Fetching post data based on the slug
-  const post = await getPost(params.slug)
+  const resolvedParams = await params
+
+  const post = await getPost(resolvedParams.slug)
 
   if (!post) {
     return <p className="text-center text-red-500">Post not found</p>
@@ -75,8 +72,7 @@ export default async function Post({
   )
 }
 
-// Update generateStaticParams to return the correct type
-export async function generateStaticParams(): Promise<{ slug: string }[]> {
+export async function generateStaticParams(): Promise<Params[]> {
   const query = `*[_type == "post"]{slug}`
   const posts = await client.fetch(query)
 
